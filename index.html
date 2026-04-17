@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vibe App 😏</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  color: white;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(-45deg, #0f0f0f, #1a1a1a, #141e30, #243b55);
+  background-size: 400% 400%;
+  animation: gradientBG 12s ease infinite;
+}
+
+@keyframes gradientBG {
+  0% {background-position: 0%}
+  50% {background-position: 100%}
+  100% {background-position: 0%}
+}
+
+#app {
+  width: 90%;
+  max-width: 400px;
+  background: rgba(20,20,20,0.9);
+  padding: 25px;
+  border-radius: 20px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 25px rgba(0,0,0,0.6);
+}
+
+/* QUESTION ANIMATION */
+#question {
+  transition: all 0.4s ease;
+}
+
+/* OPTIONS */
+.option {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 12px;
+  border-radius: 15px;
+  border: none;
+  background: #222;
+  color: white;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+/* RIPPLE */
+.option::after {
+  content: "";
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 50%;
+  transform: scale(0);
+  opacity: 0;
+  transition: 0.5s;
+}
+
+.option:active::after {
+  transform: scale(2);
+  opacity: 1;
+  transition: 0s;
+}
+
+/* POPUP */
+#popup {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #00ffcc;
+  color: black;
+  padding: 14px 20px;
+  border-radius: 20px;
+  display: none;
+  font-weight: bold;
+  opacity: 0;
+  transition: 0.3s;
+}
+
+#popup.show {
+  opacity: 1;
+  transform: translate(-50%, -10px);
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="app">
+  <h3 id="question"></h3>
+  <div id="options"></div>
+</div>
+
+<div id="popup"></div>
+
+<script>
+
+let step = 0;
+
+const questions = [
+  {
+    q: "So… you actually clicked this 😏",
+    options: ["Obviously 😄", "Just curious 👀"],
+    replies: [
+      "I like that confidence, not many people have that bold vibe 😏✨",
+      "Curiosity suits you, makes you even more interesting already 😉"
+    ]
+  },
+  {
+    q: "Be honest… am I interesting?",
+    options: ["Yes 😉", "Maybe 🤔"],
+    replies: [
+      "That was quick… you didn’t even hesitate, I like that 😌",
+      "Hmm maybe? I guess I’ll have to impress you more 😏🔥"
+    ]
+  },
+  {
+    q: "What do you think about this vibe?",
+    options: ["Pretty cool 😎", "Different 👀"],
+    replies: [
+      "You’ve got good taste, I was hoping you'd say that 😏",
+      "Different can be dangerous… but also exciting 😉"
+    ]
+  },
+  {
+    q: "Let’s start simple… tea or coffee?",
+    options: ["Tea ☕", "Coffee ☕"],
+    replies: [
+      "Tea person? calm and thoughtful… I like that vibe 😌",
+      "Coffee huh… energy + attitude, interesting combo 😏"
+    ]
+  },
+  {
+    q: "Morning person or night person?",
+    options: ["Morning 🌅", "Night 🌙"],
+    replies: [
+      "Morning type… disciplined and focused, impressive 😌",
+      "Night person… deep thinker vibes, I like that 😏"
+    ]
+  },
+  {
+    q: "Do you like deep talks or fun talks?",
+    options: ["Deep talks 🧠", "Fun talks 😄"],
+    replies: [
+      "Deep talks? okay… you’re not basic, I see 👀",
+      "Fun talks… easy to vibe with, that’s rare 😌"
+    ]
+  },
+  {
+    q: "What matters more… looks or vibe?",
+    options: ["Looks 😎", "Vibe 😌"],
+    replies: [
+      "Honest answer… bold choice, I respect that 😏",
+      "Vibe person… yeah, you understand things better 😉"
+    ]
+  },
+  {
+    q: "Do you trust people easily?",
+    options: ["Yes 🙂", "Not really 🤔"],
+    replies: [
+      "That means you’ve got a good heart… rare these days 😌",
+      "Careful type… smart move, not everyone deserves trust 😏"
+    ]
+  },
+  {
+    q: "Be honest… do you enjoy attention?",
+    options: ["Yes 😄", "Not much 😌"],
+    replies: [
+      "At least you’re honest… confidence suits you 😏",
+      "Low-key type… makes you even more interesting 😉"
+    ]
+  },
+  {
+    q: "Would you try something new randomly like this again?",
+    options: ["Yeah 😏", "Maybe 👀"],
+    replies: [
+      "I knew it… you enjoy these little moments more than you admit 😌",
+      "Maybe… I’ll take that as a yes in progress 😏"
+    ]
+  },
+  {
+    q: "Last one… should I stop here or continue? 😏",
+    options: ["Continue 🔥", "Stop 😅"],
+    replies: [
+      "Good… I wasn’t planning to stop anyway 😏",
+      "Stop? hmm… I don’t think you really want that 😉"
+    ]
+  },
+  {
+     q: "If you had to choose… long drive or long conversation?",
+     options: ["Long drive 🚗", "Long conversation 💬"],
+     replies: [
+      "Long drive… peaceful vibe, you enjoy moments I see 😌",
+      "Conversations… okay, you’re someone who understands depth 😏"
+    ]
+  },
+  {
+     q: "Are you more of an introvert or extrovert?",
+     options: ["Introvert 😌", "Extrovert 😄"],
+     replies: [
+       "Introverts are always the most interesting ones 😉",
+       "Extrovert… easy to talk to, I like that energy 😏"
+     ]
+   },
+   {  
+      q: "Do you believe in instant connection?",
+      options: ["Yes ✨", "Not really 🤔"],
+      replies: [
+        "That means you feel things deeply… rare quality 😌",
+        "Takes time huh… makes sense, real things do 😉"
+      ]
+    },
+    {
+       q: "What’s more attractive… confidence or kindness?" ,
+       options: ["Confidence 😎", "Kindness ❤️"],
+       replies: [
+         " Confidence is powerful… just like your vibe right now 😏",
+         "Kindness… yeah, that says a lot about you 😌"
+       ]
+    }, 
+    {
+       q: "Do you like surprises?",
+       options: ["Yes 🎁", "Depends 👀"],
+       replies: [
+         "Good… then maybe this wasn’t such a bad surprise 😏",
+         "Depends? I’ll try to be the good kind of surprise 😉"
+       ]
+    },
+    {
+        q: "If this was a real chat… would you reply fast or slow?",
+        options: ["Fast ⚡", "Slow 😌"],
+        replies: [
+          "Fast replies… okay, you’re interested 😏",
+          "Slow replies… keeping mystery alive, I see 😉"
+        ]
+     },
+     {
+        q: "One last thing… would you try this again?",
+        options: ["Definitely 😄", "Maybe later 😌"],
+        replies: [
+          "I knew it… you enjoyed this more than you expected 😏✨",
+          "I’ll be here… whenever you decide to come back 😉"
+        ]
+     }
+    ];
+function showPopup(text) {
+  const popup = document.getElementById("popup");
+  popup.innerText = text;
+  popup.style.display = "block";
+
+  setTimeout(() => {
+    popup.style.display = "none";
+  }, 2200);
+}
+
+function loadQuestion() {
+  const q = document.getElementById("question");
+  const opt = document.getElementById("options");
+
+  if (step < questions.length) {
+    q.innerText = questions[step].q;
+    opt.innerHTML = "";
+
+    questions[step].options.forEach((o, i) => {
+      const btn = document.createElement("button");
+      btn.className = "option";
+      btn.innerText = o;
+
+      btn.onclick = () => {
+        showPopup(questions[step].replies[i]);
+
+        setTimeout(() => {
+          step++;
+          loadQuestion();
+        }, 2200);
+      };
+
+      opt.appendChild(btn);
+    });
+  } else {
+    finish();
+  }
+}
+function changeQuestion(text) {
+  const q = document.getElementById("question");
+
+  q.style.opacity = 0;
+
+  setTimeout(() => {
+    q.innerText = text;
+    q.style.opacity = 1;
+  }, 300);
+}
+
+function showPopup(text) {
+  const popup = document.getElementById("popup");
+
+  popup.innerText = text;
+  popup.style.display = "block";
+
+  setTimeout(() => popup.classList.add("show"), 10);
+
+  setTimeout(() => {
+    popup.classList.remove("show");
+    popup.style.display = "none";
+  }, 2200);
+}
+
+function loadQuestion() {
+  const opt = document.getElementById("options");
+
+  if (step < questions.length) {
+    changeQuestion(questions[step].q);
+    opt.innerHTML = "";
+
+    questions[step].options.forEach((o, i) => {
+      const btn = document.createElement("button");
+      btn.className = "option";
+      btn.innerText = o;
+
+      btn.onclick = () => {
+        showPopup(questions[step].replies[i]);
+
+        setTimeout(() => {
+          step++;
+          loadQuestion();
+        }, 2200);
+      };
+
+      opt.appendChild(btn);
+    });
+
+  } else {
+    finish();
+  }
+}
+
+function finish() {
+  changeQuestion("That was fun… but you made it better 😏");
+
+  document.getElementById("options").innerHTML = `
+    <button class="option" onclick="restart()">Again 🔁</button>
+    <button class="option" onclick="finalFlirt()">Wait 😏</button>
+  `;
+}
+
+function finalFlirt() {
+  showPopup("You stayed till the end… that says more than words 😏✨");
+}
+
+function restart() {
+  step = 0;
+  loadQuestion();
+}
+
+loadQuestion();
+
+</script>
+
+</body>
+</html>
